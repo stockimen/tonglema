@@ -156,11 +156,11 @@ export const StatusCard: React.FC<StatusCardProps> = memo(({ site, result, onChe
               target="_blank" 
               rel="noopener noreferrer" 
               // Added pointer-events-auto to re-enable clicks on the link
-              className="text-[10px] text-muted/60 hover:text-primary truncate w-full mt-1 flex items-center gap-0.5 relative pointer-events-auto"
+              className="text-xs text-muted/60 hover:text-primary truncate w-full mt-1 flex items-center gap-1 relative pointer-events-auto"
               onClick={(e) => e.stopPropagation()}
             >
               {site.url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}
-              <ExternalLink className="w-2 h-2 opacity-50 shrink-0" />
+              <ExternalLink className="w-3.5 h-3.5 opacity-50 shrink-0" />
             </a>
           </div>
         </div>
