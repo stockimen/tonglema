@@ -54,6 +54,13 @@ export const SITES: SiteConfig[] = [
     category: 'AI',
   },
   {
+    id: 'windsurf',
+    name: 'Windsurf',
+    name_zh: 'Windsurf (Codeium)',
+    url: 'https://codeium.com',
+    category: 'AI',
+  },
+  {
     id: 'google',
     name: 'Google',
     name_zh: '谷歌',
@@ -72,6 +79,27 @@ export const SITES: SiteConfig[] = [
     name: 'Twitter / X',
     name_zh: '推特 (X)',
     url: 'https://twitter.com',
+    category: 'Social',
+  },
+  {
+    id: 'facebook',
+    name: 'Facebook',
+    name_zh: 'Facebook (脸书)',
+    url: 'https://www.facebook.com',
+    category: 'Social',
+  },
+  {
+    id: 'instagram',
+    name: 'Instagram',
+    name_zh: 'Instagram (INS)',
+    url: 'https://www.instagram.com',
+    category: 'Social',
+  },
+  {
+    id: 'threads',
+    name: 'Threads',
+    name_zh: 'Threads',
+    url: 'https://www.threads.net',
     category: 'Social',
   },
   {
