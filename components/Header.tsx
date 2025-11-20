@@ -38,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
   const t = TRANSLATIONS[lang];
 
   return (
-    <header className="w-full py-4 px-4 md:px-0 border-b border-border bg-background/80 sticky top-0 z-50 backdrop-blur-xl transition-colors duration-300">
+    <header className="w-full py-4 px-4 md:px-6 border-b border-border bg-background/80 sticky top-0 z-50 backdrop-blur-xl transition-colors duration-300">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
         
         {/* Logo Section */}
@@ -58,11 +58,11 @@ export const Header: React.FC<HeaderProps> = ({
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                 </span>
               </h1>
-              <p className="text-xs text-muted font-medium">{t.app_subtitle}</p>
+              <p className="text-xs text-muted font-medium hidden sm:block">{t.app_subtitle}</p>
             </div>
           </div>
 
-          {/* Mobile Controls Group */}
+          {/* Mobile Controls (Visible only on small screens) */}
           <div className="flex items-center gap-2 md:hidden">
             <button
               onClick={toggleLang}
@@ -80,82 +80,87 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Desktop Controls Section */}
-        <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+        <div className="flex items-center w-full md:w-auto justify-end gap-4">
           
-          {/* Last Checked Display */}
-          {lastChecked && (
-             <div className="hidden sm:flex flex-col items-end mr-2 px-3 border-r border-border/50">
-                <span className="text-[10px] text-muted font-medium uppercase tracking-wider">{t.last_update}</span>
-                <span className="text-xs font-mono font-bold text-text tabular-nums">
-                   {new Date(lastChecked).toLocaleTimeString()}
-                </span>
-             </div>
-          )}
-
-          {/* Auto Refresh Dropdown */}
-          <div className="relative group flex items-center">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted">
-              <Clock className="w-3.5 h-3.5" />
-            </div>
-            <select
-              value={refreshInterval}
-              onChange={(e) => setRefreshInterval(Number(e.target.value))}
-              className="appearance-none pl-9 pr-8 py-2 bg-surface border border-border text-text text-xs font-medium rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all hover:bg-muted/5 cursor-pointer min-w-[100px]"
+          {/* Group 1: Global Settings (Language & Theme) */}
+          <div className="hidden md:flex items-center gap-2">
+             <button
+              onClick={toggleLang}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-muted hover:text-text hover:bg-surface transition-colors text-xs font-bold"
+              aria-label="Toggle Language"
             >
-              {INTERVAL_OPTIONS.map(opt => (
-                <option key={opt.value} value={opt.value}>
-                  {lang === 'zh' ? opt.label_zh : opt.label}
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-muted">
-              <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-            </div>
+              <Languages className="w-4 h-4" />
+              <span>{lang === 'zh' ? 'EN' : '中文'}</span>
+            </button>
+
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg text-muted hover:text-text hover:bg-surface transition-colors"
+              aria-label="Toggle Theme"
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
           </div>
 
-           {/* Language Toggle (Desktop) */}
-           <button
-            onClick={toggleLang}
-            className="hidden md:flex items-center gap-1 p-2 rounded-lg bg-surface border border-border text-muted hover:text-text hover:bg-muted/10 transition-colors text-xs font-bold"
-            aria-label="Toggle Language"
-          >
-            <Languages className="w-4 h-4" />
-            <span>{lang === 'zh' ? 'EN' : '中文'}</span>
-          </button>
+          {/* Vertical Divider */}
+          <div className="hidden md:block w-px h-8 bg-border/60"></div>
 
-          {/* Theme Toggle (Desktop) */}
-          <button
-            onClick={toggleTheme}
-            className="hidden md:flex p-2 rounded-lg bg-surface border border-border text-muted hover:text-text hover:bg-muted/10 transition-colors"
-            aria-label="Toggle Theme"
-          >
-            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
-          
-          {/* Check Button */}
-          <button
-            onClick={onCheckAll}
-            disabled={isChecking}
-            className={`
-              flex items-center gap-2 px-5 py-2 rounded-lg font-medium text-xs transition-all shadow-sm whitespace-nowrap
-              ${isChecking 
-                ? 'bg-surface text-muted cursor-not-allowed border border-border' 
-                : 'bg-primary hover:bg-primary/90 text-white shadow-[0_0_15px_-3px_rgba(59,130,246,0.4)]'
-              }
-            `}
-          >
-            {isChecking ? (
-              <>
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                {t.scanning}
-              </>
-            ) : (
-              <>
-                <Play className="w-3.5 h-3.5 fill-current" />
-                {t.check_now}
-              </>
+          {/* Group 2: Action Bar (Time, Interval, Check) */}
+          <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end bg-surface/50 md:bg-transparent p-2 md:p-0 rounded-xl md:rounded-none border md:border-none border-border">
+            
+            {/* Last Checked Display */}
+            {lastChecked && (
+               <div className="flex flex-col items-end px-2 whitespace-nowrap">
+                  <span className="text-[10px] text-muted font-medium uppercase tracking-wider leading-none mb-1">{t.last_update}</span>
+                  <span className="text-xs font-mono font-bold text-text tabular-nums leading-none">
+                     {new Date(lastChecked).toLocaleTimeString()}
+                  </span>
+               </div>
             )}
-          </button>
+
+            <div className="flex items-center gap-2">
+              {/* Auto Refresh Dropdown */}
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-2.5 flex items-center pointer-events-none text-muted">
+                  <Clock className="w-3.5 h-3.5" />
+                </div>
+                <select
+                  value={refreshInterval}
+                  onChange={(e) => setRefreshInterval(Number(e.target.value))}
+                  className="appearance-none pl-8 pr-8 py-2 bg-surface border border-border text-text text-xs font-medium rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all hover:bg-muted/5 cursor-pointer"
+                >
+                  {INTERVAL_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>
+                      {lang === 'zh' ? opt.label_zh : opt.label}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none text-muted">
+                  <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+              </div>
+              
+              {/* Check Button */}
+              <button
+                onClick={onCheckAll}
+                disabled={isChecking}
+                className={`
+                  flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all shadow-sm whitespace-nowrap
+                  ${isChecking 
+                    ? 'bg-surface text-muted cursor-not-allowed border border-border' 
+                    : 'bg-primary hover:bg-primary/90 text-white shadow-[0_0_15px_-3px_rgba(59,130,246,0.4)]'
+                  }
+                `}
+              >
+                {isChecking ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                )}
+                <span className="hidden sm:inline">{t.check_now}</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </header>
