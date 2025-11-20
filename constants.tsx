@@ -33,6 +33,27 @@ export const SITES: SiteConfig[] = [
     category: 'AI',
   },
   {
+    id: 'grok',
+    name: 'Grok',
+    name_zh: 'Grok (xAI)',
+    url: 'https://grok.x.ai',
+    category: 'AI',
+  },
+  {
+    id: 'copilot',
+    name: 'Microsoft Copilot',
+    name_zh: '微软 Copilot',
+    url: 'https://copilot.microsoft.com',
+    category: 'AI',
+  },
+  {
+    id: 'mistral',
+    name: 'Mistral AI',
+    name_zh: 'Mistral AI',
+    url: 'https://chat.mistral.ai',
+    category: 'AI',
+  },
+  {
     id: 'midjourney',
     name: 'Midjourney',
     name_zh: 'Midjourney',
