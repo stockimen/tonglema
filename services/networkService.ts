@@ -32,14 +32,26 @@ const fetchUrl = async (url: string, method: string = 'HEAD', timeout: number = 
 
 /**
  * Checks connectivity to a site.
- * Strategy:
- * 1. Try HEAD request to root URL (Fastest, lightweight).
- * 2. If fails, Try GET request to /favicon.ico (Fallback, better compatibility).
+ * Strategy (Updated):
+ * 1. Try GET request to /favicon.ico (Preferred: lighter, often whitelisted).
+ * 2. If fails, Try HEAD request to root URL (Fallback).
  */
 export const checkConnectivity = async (siteId: string, url: string): Promise<CheckResult> => {
+  // Construct Favicon URL
+  let faviconUrl = '';
   try {
-    // Attempt 1: Standard Root Check (HEAD)
-    const latency = await fetchUrl(url, 'HEAD', TIMEOUT_MS);
+    const urlObj = new URL(url);
+    faviconUrl = `${urlObj.origin}/favicon.ico`;
+  } catch (e) {
+    // Fallback if URL parsing fails
+    faviconUrl = url; 
+  }
+
+  try {
+    // Attempt 1: Favicon Check (GET)
+    // We use GET for favicon as it's a static resource. 
+    // We use a slightly shorter timeout (4s) for the primary attempt to keep UI responsive if fallback is needed.
+    const latency = await fetchUrl(faviconUrl, 'GET', 4000);
     return {
       siteId,
       status: ConnectivityStatus.SUCCESS,
@@ -47,28 +59,11 @@ export const checkConnectivity = async (siteId: string, url: string): Promise<Ch
       timestamp: Date.now(),
     };
   } catch (error: any) {
-    // If first attempt failed due to Abort (Timeout), return timeout immediately.
-    // If it failed due to network error/CORS rejection, try fallback.
+    // If attempt 1 (Favicon) fails, try Attempt 2 (Root URL)
     
-    // Construct Favicon URL for fallback
-    let fallbackUrl = '';
     try {
-      const urlObj = new URL(url);
-      fallbackUrl = `${urlObj.origin}/favicon.ico`;
-    } catch (e) {
-      // If URL parsing fails, cannot do fallback
-      return {
-        siteId,
-        status: ConnectivityStatus.ERROR,
-        latency: 0,
-        timestamp: Date.now(),
-      };
-    }
-
-    try {
-      // Attempt 2: Favicon Fallback (GET)
-      // We give it a slightly shorter timeout for the fallback to keep UI snappy
-      const latency = await fetchUrl(fallbackUrl, 'GET', 4000);
+      // Attempt 2: Root URL Check (HEAD)
+      const latency = await fetchUrl(url, 'HEAD', TIMEOUT_MS);
       return {
         siteId,
         status: ConnectivityStatus.SUCCESS,
@@ -77,7 +72,9 @@ export const checkConnectivity = async (siteId: string, url: string): Promise<Ch
       };
     } catch (fallbackError: any) {
       let status = ConnectivityStatus.ERROR;
-      if (fallbackError.name === 'AbortError' || error.name === 'AbortError') {
+      
+      // Check if either error was a timeout
+      if (error.name === 'AbortError' || fallbackError.name === 'AbortError') {
         status = ConnectivityStatus.TIMEOUT;
       }
 
