@@ -113,7 +113,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, l
       whileHover={{ y: -4, scale: 1.01 }}
       transition={{ duration: 0.2 }}
       className={`
-        relative group overflow-hidden will-change-transform
+        relative group overflow-hidden
         rounded-2xl border ${styles.border} ${styles.bg} ${styles.glow}
         transition-all duration-300 flex flex-col h-[120px]
       `}

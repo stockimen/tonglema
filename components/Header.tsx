@@ -39,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
   const t = TRANSLATIONS[lang];
 
   return (
-    <header className="w-full py-4 px-4 md:px-6 border-b border-border bg-background/80 sticky top-0 z-50 backdrop-blur-xl transition-colors duration-300">
+    <header className="w-full py-4 px-4 md:px-6 border-b border-border bg-background/80 sticky top-0 z-[999] backdrop-blur-xl transition-colors duration-300">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
         
         {/* Logo Section */}
