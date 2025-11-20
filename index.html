@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,15 +11,15 @@
         theme: {
           extend: {
             colors: {
-              background: '#09090b',
-              surface: '#18181b',
-              border: '#27272a',
-              primary: '#3b82f6',
+              background: 'rgb(var(--background) / <alpha-value>)',
+              surface: 'rgb(var(--surface) / <alpha-value>)',
+              border: 'rgb(var(--border) / <alpha-value>)',
+              primary: 'rgb(var(--primary) / <alpha-value>)',
               success: '#22c55e',
               warning: '#eab308',
               danger: '#ef4444',
-              text: '#e4e4e7',
-              muted: '#a1a1aa',
+              text: 'rgb(var(--text) / <alpha-value>)',
+              muted: 'rgb(var(--muted) / <alpha-value>)',
             },
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
@@ -29,24 +29,46 @@
       };
     </script>
     <style>
-      body {
-        background-color: #09090b;
-        color: #e4e4e7;
-        font-family: 'Inter', sans-serif;
+      :root {
+        /* Light Mode Colors */
+        --background: 249 250 251; /* gray-50 */
+        --surface: 255 255 255;    /* white */
+        --border: 229 231 235;     /* gray-200 */
+        --primary: 59 130 246;     /* blue-500 */
+        --text: 24 24 27;          /* gray-900 */
+        --muted: 113 113 122;      /* gray-500 */
       }
+
+      .dark {
+        /* Dark Mode Colors */
+        --background: 9 9 11;      /* zinc-950 */
+        --surface: 24 24 27;       /* zinc-900 */
+        --border: 39 39 42;        /* zinc-800 */
+        --primary: 59 130 246;     /* blue-500 */
+        --text: 228 228 231;       /* zinc-200 */
+        --muted: 161 161 170;      /* zinc-400 */
+      }
+
+      body {
+        background-color: rgb(var(--background));
+        color: rgb(var(--text));
+        font-family: 'Inter', sans-serif;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
       /* Custom Scrollbar */
       ::-webkit-scrollbar {
         width: 8px;
       }
       ::-webkit-scrollbar-track {
-        background: #09090b;
+        background: transparent;
       }
       ::-webkit-scrollbar-thumb {
-        background: #27272a;
+        background: rgb(var(--border));
         border-radius: 4px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #3f3f46;
+        background: rgb(var(--muted));
       }
     </style>
   <script type="importmap">

@@ -14,15 +14,15 @@ const getStatusColor = (status: ConnectivityStatus, latency: number) => {
     case ConnectivityStatus.IDLE:
       return 'border-border bg-surface text-muted';
     case ConnectivityStatus.PENDING:
-      return 'border-blue-500/50 bg-blue-500/10 text-blue-400';
+      return 'border-blue-500/30 bg-blue-500/5 text-blue-600 dark:text-blue-400';
     case ConnectivityStatus.TIMEOUT:
-      return 'border-warning/50 bg-warning/10 text-warning';
+      return 'border-warning/50 bg-warning/10 text-yellow-600 dark:text-yellow-400';
     case ConnectivityStatus.ERROR:
-      return 'border-danger/50 bg-danger/10 text-danger';
+      return 'border-danger/50 bg-danger/10 text-red-600 dark:text-red-400';
     case ConnectivityStatus.SUCCESS:
-      if (latency < 200) return 'border-green-500/50 bg-green-500/10 text-green-400';
-      if (latency < 800) return 'border-yellow-500/50 bg-yellow-500/10 text-yellow-400';
-      return 'border-orange-500/50 bg-orange-500/10 text-orange-400';
+      if (latency < 200) return 'border-green-500/50 bg-green-500/10 text-green-600 dark:text-green-400';
+      if (latency < 800) return 'border-yellow-500/50 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400';
+      return 'border-orange-500/50 bg-orange-500/10 text-orange-600 dark:text-orange-400';
     default:
       return 'border-border bg-surface';
   }
@@ -61,13 +61,13 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck })
       animate={{ opacity: 1, scale: 1 }}
       whileHover={{ y: -2 }}
       transition={{ duration: 0.2 }}
-      className={`relative group p-4 rounded-xl border ${colorClass} shadow-lg backdrop-blur-sm transition-all duration-300 flex flex-col gap-3`}
+      className={`relative group p-4 rounded-xl border ${colorClass} shadow-sm hover:shadow-md transition-all duration-300 flex flex-col gap-3`}
     >
       <div className="flex justify-between items-start">
-        <div className="p-2 rounded-lg bg-black/20">
+        <div className="p-2 rounded-lg bg-black/5 dark:bg-black/20">
           <Icon className="w-6 h-6" />
         </div>
-        <div className={`text-xs font-mono font-medium px-2 py-1 rounded-full bg-black/20 flex items-center gap-1.5 min-w-[80px] justify-center`}>
+        <div className={`text-xs font-mono font-medium px-2 py-1 rounded-full bg-black/5 dark:bg-black/20 flex items-center gap-1.5 min-w-[80px] justify-center`}>
            <StatusIcon />
            <span>{getStatusLabel(status, latency)}</span>
         </div>
@@ -81,14 +81,14 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck })
       {/* Interactive Overlay for manual recheck */}
       <button
         onClick={() => onCheck(site.id, site.url)}
-        className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity bg-black/5 rounded-xl cursor-pointer focus:outline-none focus:ring-2 ring-primary/50"
+        className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity bg-black/5 dark:bg-white/5 rounded-xl cursor-pointer focus:outline-none focus:ring-2 ring-primary/50"
         title="Click to re-check"
         aria-label={`Check status for ${site.name}`}
       />
       
       {/* Progress Bar for Latency Visual */}
       {status === ConnectivityStatus.SUCCESS && (
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-800 rounded-b-xl overflow-hidden">
+        <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-200 dark:bg-gray-800 rounded-b-xl overflow-hidden">
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: `${Math.min((latency / 2000) * 100, 100)}%` }}

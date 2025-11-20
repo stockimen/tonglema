@@ -12,7 +12,8 @@ import {
   Code,
   Image,
   Mail,
-  Tv
+  Tv,
+  Sparkles
 } from 'lucide-react';
 import { SiteConfig } from './types';
 
@@ -37,6 +38,20 @@ export const SITES: SiteConfig[] = [
     name: 'ChatGPT',
     url: 'https://chatgpt.com',
     icon: MessageCircle,
+    category: 'AI',
+  },
+  {
+    id: 'claude',
+    name: 'Claude',
+    url: 'https://claude.ai',
+    icon: Sparkles,
+    category: 'AI',
+  },
+  {
+    id: 'midjourney',
+    name: 'Midjourney',
+    url: 'https://www.midjourney.com',
+    icon: Image,
     category: 'AI',
   },
   {
@@ -122,12 +137,5 @@ export const SITES: SiteConfig[] = [
     url: 'https://www.twitch.tv',
     icon: Tv,
     category: 'Media',
-  },
-  {
-    id: 'midjourney',
-    name: 'Midjourney',
-    url: 'https://www.midjourney.com',
-    icon: Image,
-    category: 'AI',
   }
 ];
