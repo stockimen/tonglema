@@ -80,7 +80,7 @@ export default function App() {
   }, []);
 
   // Calculate overview stats
-  const stats = Object.values(results).reduce((acc: { online: number; offline: number; avgLatency: number; count: number }, curr: CheckResult) => {
+  const stats = Object.values(results).reduce<{ online: number; offline: number; avgLatency: number; count: number }>((acc, curr) => {
     if (curr.status === ConnectivityStatus.SUCCESS) acc.online++;
     if (curr.status === ConnectivityStatus.ERROR || curr.status === ConnectivityStatus.TIMEOUT) acc.offline++;
     if (curr.latency > 0) {
@@ -148,7 +148,7 @@ export default function App() {
 
       <footer className="py-8 border-t border-border mt-auto">
         <div className="max-w-7xl mx-auto px-4 text-center text-muted text-sm">
-          <p>© {new Date().getFullYear()} NetGlance. Testing from your local browser.</p>
+          <p>© {new Date().getFullYear()} TongLeMa (tonglema.com). Testing from your local browser.</p>
           <p className="mt-2 opacity-60">Latency values are estimates based on HTTP headers retrieval time.</p>
         </div>
       </footer>

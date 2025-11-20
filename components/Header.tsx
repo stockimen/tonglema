@@ -18,12 +18,12 @@ export const Header: React.FC<HeaderProps> = ({ onCheckAll, isChecking, lastChec
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-              NetGlance
+              TongLeMa
               <span className="text-xs font-normal px-2 py-0.5 bg-green-500/10 text-green-400 border border-green-500/20 rounded-full">
                 Live
               </span>
             </h1>
-            <p className="text-sm text-muted">Global Connectivity & Latency Dashboard</p>
+            <p className="text-sm text-muted">Global Connectivity & Latency Dashboard (通了吗)</p>
           </div>
         </div>
 

@@ -1,5 +1,5 @@
 {
-  "name": "NetGlance - Connectivity Dashboard",
-  "description": "A visual dashboard to check network latency and connectivity to popular global services like Google, Gemini, and ChatGPT, tailored for network testing.",
+  "name": "TongLeMa - Connectivity Dashboard",
+  "description": "A visual dashboard to check network latency and connectivity to popular global services. TongLeMa (通了吗) - Is it connected?",
   "requestFramePermissions": []
 }
