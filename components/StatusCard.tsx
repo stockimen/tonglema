@@ -118,10 +118,12 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, l
         transition-all duration-300 flex flex-col h-[120px]
       `}
     >
-      <div className="flex-1 p-4 flex items-start justify-between relative z-10">
-        <div className="flex items-start gap-3">
-          {/* Icon Container */}
-          <div className="relative p-2 rounded-xl bg-background/50 border border-border/50 shadow-sm backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
+      {/* Content Wrapper: z-30 + pointer-events-none to sit above button (z-20) but let clicks pass through */}
+      <div className="flex-1 p-4 flex items-start justify-between relative z-30 pointer-events-none">
+        {/* Left Side: Icon + Text. flex-1 and min-w-0 allows truncation to work properly without pushing right side */}
+        <div className="flex items-start gap-3 flex-1 min-w-0 pr-2">
+          {/* Icon Container - shrink-0 to prevent squishing */}
+          <div className="relative p-2 rounded-xl bg-background/50 border border-border/50 shadow-sm backdrop-blur-sm group-hover:scale-110 transition-transform duration-300 shrink-0">
             <img 
               src={displayIconUrl} 
               alt={`${displayName} icon`} 
@@ -145,24 +147,25 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, l
             />
           </div>
           
-          {/* Text Info */}
-          <div className="flex flex-col">
+          {/* Text Info - min-w-0 to allow text truncation */}
+          <div className="flex flex-col min-w-0 w-full">
             <h3 className="font-bold text-base text-text leading-tight line-clamp-1">{displayName}</h3>
             <a 
               href={site.url} 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="text-[10px] text-muted/60 hover:text-primary truncate max-w-[100px] mt-1 flex items-center gap-0.5"
+              // Added pointer-events-auto to re-enable clicks on the link
+              className="text-[10px] text-muted/60 hover:text-primary truncate w-full mt-1 flex items-center gap-0.5 relative pointer-events-auto"
               onClick={(e) => e.stopPropagation()}
             >
               {site.url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}
-              <ExternalLink className="w-2 h-2 opacity-50" />
+              <ExternalLink className="w-2 h-2 opacity-50 shrink-0" />
             </a>
           </div>
         </div>
 
-        {/* Status Badge Top Right */}
-        <div className="flex flex-col items-end gap-1">
+        {/* Status Badge Top Right - shrink-0 to prevent being squished by long text */}
+        <div className="flex flex-col items-end gap-1 shrink-0">
           {renderStatusIndicator()}
           {status === ConnectivityStatus.SUCCESS && (
             <span className={`text-xs font-mono font-bold ${styles.text} ${isRefreshing ? 'opacity-50' : ''}`}>
@@ -172,8 +175,8 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, l
         </div>
       </div>
 
-      {/* Middle Status/Action Area */}
-      <div className="px-4 pb-3 relative z-10">
+      {/* Middle Status/Action Area - z-30 + pointer-events-none */}
+      <div className="px-4 pb-3 relative z-30 pointer-events-none">
          {(status === ConnectivityStatus.PENDING || (status === ConnectivityStatus.IDLE && isRefreshing)) && (
            <div className="flex items-center gap-2 text-xs text-primary animate-pulse">
              <RefreshCw className="w-3 h-3 animate-spin" />
@@ -218,7 +221,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, l
         )}
       </div>
 
-      {/* Click Overlay */}
+      {/* Click Overlay - z-20 (Must be lower than content z-30) */}
       <button
         onClick={() => onCheck(site)}
         className="absolute inset-0 w-full h-full z-20 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-2xl"
