@@ -5,7 +5,7 @@ import { StatusCard } from './components/StatusCard';
 import { SITES, TRANSLATIONS } from './constants';
 import { checkConnectivity } from './services/networkService';
 import { CheckResult, ConnectivityStatus, CheckResultMap, SiteConfig, Language } from './types';
-import { Shield, Globe2, Info, Layers, Lock } from 'lucide-react';
+import { Shield, Globe2, Info, Layers, Lock, Github } from 'lucide-react';
 
 export default function App() {
   const [results, setResults] = useState<CheckResultMap>({});
@@ -355,9 +355,20 @@ export default function App() {
           
           <div className="h-px w-12 bg-border/50 my-2"></div>
 
-          <p className="text-[10px] text-muted/40">
-            © 2023-2025 <span className="font-medium text-muted/60 hover:text-primary transition-colors cursor-default">Magicx.dev</span>
-          </p>
+          <div className="flex flex-col items-center gap-1.5">
+            <p className="text-[10px] text-muted/40">
+              © 2023-2025 <span className="font-medium text-muted/60 hover:text-primary transition-colors cursor-default">Magicx.dev</span>
+            </p>
+            <a 
+              href="https://github.com/simonxmau/tonglema" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-[10px] text-muted/40 hover:text-text transition-colors"
+            >
+              <Github className="w-3 h-3 opacity-60" />
+              <span>github.com/simonxmau/tonglema</span>
+            </a>
+          </div>
         </div>
       </footer>
     </div>
