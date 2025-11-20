@@ -1,10 +1,14 @@
 
+export type Language = 'en' | 'zh';
+
 export interface SiteConfig {
   id: string;
   name: string;
-  url: string; // The URL to ping (usually the homepage or a highly available asset)
+  name_zh?: string; // Chinese name
+  url: string;
   category: 'Search' | 'Social' | 'AI' | 'Media' | 'Dev' | 'Other';
   description?: string;
+  description_zh?: string; // Chinese description
 }
 
 export enum ConnectivityStatus {

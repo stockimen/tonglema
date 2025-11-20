@@ -2,9 +2,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Header } from './components/Header';
 import { StatusCard } from './components/StatusCard';
-import { SITES } from './constants';
+import { SITES, TRANSLATIONS } from './constants';
 import { checkConnectivity } from './services/networkService';
-import { CheckResult, ConnectivityStatus, CheckResultMap, SiteConfig } from './types';
+import { CheckResult, ConnectivityStatus, CheckResultMap, SiteConfig, Language } from './types';
 import { Shield, Globe2, Info, Layers } from 'lucide-react';
 
 export default function App() {
@@ -13,21 +13,11 @@ export default function App() {
   const [lastChecked, setLastChecked] = useState<number | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [refreshInterval, setRefreshInterval] = useState<number>(0); // 0 = off
+  const [lang, setLang] = useState<Language>('en');
 
-  // Theme toggle handler
-  const toggleTheme = useCallback(() => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('theme', newTheme);
-  }, [theme]);
-
-  // Initialize theme
+  // Initialize theme and language
   useEffect(() => {
+    // Theme initialization
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
@@ -42,7 +32,41 @@ export default function App() {
       setTheme('light');
       document.documentElement.classList.remove('dark');
     }
+
+    // Language initialization
+    const savedLang = localStorage.getItem('lang') as Language | null;
+    if (savedLang) {
+      setLang(savedLang);
+    } else {
+      const browserLang = navigator.language || 'en';
+      if (browserLang.toLowerCase().startsWith('zh')) {
+        setLang('zh');
+      } else {
+        setLang('en');
+      }
+    }
   }, []);
+
+  // Toggle Language
+  const toggleLang = useCallback(() => {
+    setLang(prev => {
+      const next = prev === 'en' ? 'zh' : 'en';
+      localStorage.setItem('lang', next);
+      return next;
+    });
+  }, []);
+
+  // Theme toggle handler
+  const toggleTheme = useCallback(() => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', newTheme);
+  }, [theme]);
 
   // Function to check a single site
   const handleCheckSite = useCallback(async (id: string, url: string) => {
@@ -66,23 +90,11 @@ export default function App() {
 
   // Function to check all sites
   const handleCheckAll = useCallback(async () => {
-    // If we are already strictly checking manually, maybe we don't block, 
-    // but for simplicity let's prevent overlaps
     if (isChecking) return;
     
     setIsChecking(true);
     setLastChecked(Date.now());
 
-    // NOTE: We do NOT reset all to PENDING here if we want a smoother auto-refresh experience.
-    // We only want visual updates when new data comes in.
-    // But for manual "Check Now", user might expect a reset. 
-    // Let's assume we keep existing state and just update status to PENDING locally per item effectively
-    // or just let the UI show loading spinner based on internal state if needed.
-    // For this app, showing "Pinging..." in the card (handled by StatusCard status) is good.
-    
-    // To avoid "flashing" the whole UI to grey, we can iterate and set status to PENDING 
-    // only if we want that visual feedback. 
-    // Let's update the statuses to PENDING to show activity.
     setResults(prev => {
       const next = { ...prev };
       SITES.forEach(site => {
@@ -97,7 +109,7 @@ export default function App() {
     });
 
     // Execute in batches
-    const batchSize = 6; // Increased batch size
+    const batchSize = 6; 
     for (let i = 0; i < SITES.length; i += batchSize) {
       const batch = SITES.slice(i, i + batchSize);
       const promises = batch.map(site => checkConnectivity(site.id, site.url));
@@ -120,9 +132,6 @@ export default function App() {
     if (refreshInterval === 0) return;
 
     const id = setInterval(() => {
-      // We need to bypass the `isChecking` check inside handleCheckAll partially 
-      // or ensure handleCheckAll is stable. 
-      // If `isChecking` is true, the interval callback will just return, which is fine.
       handleCheckAll();
     }, refreshInterval);
 
@@ -157,6 +166,7 @@ export default function App() {
 
   // Define category order
   const categoryOrder = ['AI', 'Search', 'Social', 'Media', 'Dev'];
+  const t = TRANSLATIONS[lang];
 
   return (
     <div className="min-h-screen bg-background text-text flex flex-col transition-colors duration-500">
@@ -168,6 +178,8 @@ export default function App() {
         toggleTheme={toggleTheme}
         refreshInterval={refreshInterval}
         setRefreshInterval={setRefreshInterval}
+        lang={lang}
+        toggleLang={toggleLang}
       />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8 space-y-10">
@@ -179,7 +191,7 @@ export default function App() {
                <Shield className="w-7 h-7" />
              </div>
              <div>
-               <p className="text-sm font-medium text-muted uppercase tracking-wider">Services Online</p>
+               <p className="text-sm font-medium text-muted uppercase tracking-wider">{t.services_online}</p>
                <div className="flex items-baseline gap-2">
                  <p className="text-3xl font-bold text-text">{stats.online}</p>
                  <span className="text-muted text-sm">/ {SITES.length}</span>
@@ -191,7 +203,7 @@ export default function App() {
                <Globe2 className="w-7 h-7" />
              </div>
              <div>
-               <p className="text-sm font-medium text-muted uppercase tracking-wider">Avg. Latency</p>
+               <p className="text-sm font-medium text-muted uppercase tracking-wider">{t.avg_latency}</p>
                <div className="flex items-baseline gap-2">
                  <p className="text-3xl font-bold text-text">{avgLatency}</p>
                  <span className="text-sm font-medium text-muted">ms</span>
@@ -203,9 +215,9 @@ export default function App() {
                <Info className="w-7 h-7" />
              </div>
              <div>
-               <p className="text-sm font-medium text-muted uppercase tracking-wider">Network Mode</p>
+               <p className="text-sm font-medium text-muted uppercase tracking-wider">{t.network_mode}</p>
                <div className="flex items-baseline gap-2">
-                 <p className="text-lg font-bold text-text">Browser Proxy</p>
+                 <p className="text-lg font-bold text-text">{t.browser_proxy}</p>
                </div>
              </div>
           </div>
@@ -217,12 +229,15 @@ export default function App() {
             const categorySites = groupedSites[category];
             if (!categorySites) return null;
 
+            // Translate Category Name
+            const displayCategory = t.categories[category as keyof typeof t.categories] || category;
+
             return (
               <div key={category} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <div className="flex items-center gap-3 mb-5">
                   <h2 className="text-lg font-bold text-text flex items-center gap-2 bg-surface/50 px-3 py-1 rounded-lg border border-border/50 backdrop-blur-sm">
                     {category === 'AI' && <Layers className="w-4 h-4 text-primary" />}
-                    {category}
+                    {displayCategory}
                   </h2>
                   <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent"></div>
                 </div>
@@ -234,6 +249,7 @@ export default function App() {
                       site={site}
                       result={results[site.id]}
                       onCheck={handleCheckSite}
+                      lang={lang}
                     />
                   ))}
                 </div>
@@ -246,7 +262,7 @@ export default function App() {
              <div key={category} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <div className="flex items-center gap-3 mb-5">
                    <h2 className="text-lg font-bold text-text flex items-center gap-2 bg-surface/50 px-3 py-1 rounded-lg border border-border/50 backdrop-blur-sm">
-                    {category}
+                    {t.categories[category as keyof typeof t.categories] || category}
                   </h2>
                   <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent"></div>
                 </div>
@@ -257,6 +273,7 @@ export default function App() {
                       site={site}
                       result={results[site.id]}
                       onCheck={handleCheckSite}
+                      lang={lang}
                     />
                   ))}
                 </div>
@@ -268,10 +285,9 @@ export default function App() {
 
       <footer className="py-10 border-t border-border mt-auto bg-surface/30 backdrop-blur-lg">
         <div className="max-w-7xl mx-auto px-4 text-center space-y-2">
-          <p className="text-sm font-medium text-text">© {new Date().getFullYear()} TongLeMa</p>
+          <p className="text-sm font-medium text-text">© {new Date().getFullYear()} {t.app_title}</p>
           <p className="text-xs text-muted max-w-md mx-auto leading-relaxed">
-            Real-time connectivity dashboard. Checks are performed directly from your browser via encrypted HEAD requests. 
-            Latency times may include browser processing overhead.
+            {t.footer_text}
           </p>
         </div>
       </footer>

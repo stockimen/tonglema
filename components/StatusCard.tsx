@@ -2,17 +2,23 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { RefreshCw, WifiOff, AlertCircle, ExternalLink } from 'lucide-react';
-import { CheckResult, ConnectivityStatus, SiteConfig } from '../types';
+import { CheckResult, ConnectivityStatus, SiteConfig, Language } from '../types';
+import { TRANSLATIONS } from '../constants';
 
 interface StatusCardProps {
   site: SiteConfig;
   result?: CheckResult;
   onCheck: (id: string, url: string) => void;
+  lang: Language;
 }
 
-export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck }) => {
+export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, lang }) => {
   const status = result?.status || ConnectivityStatus.IDLE;
   const latency = result?.latency || 0;
+  const t = TRANSLATIONS[lang];
+
+  // Determine display name
+  const displayName = (lang === 'zh' && site.name_zh) ? site.name_zh : site.name;
 
   const getStatusStyles = () => {
     switch (status) {
@@ -107,7 +113,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck })
           <div className="relative p-2 rounded-xl bg-background/50 border border-border/50 shadow-sm backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
             <img 
               src={faviconUrl} 
-              alt={`${site.name} icon`} 
+              alt={`${displayName} icon`} 
               className="w-8 h-8 object-contain rounded-sm"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none';
@@ -117,7 +123,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck })
           
           {/* Text Info */}
           <div className="flex flex-col">
-            <h3 className="font-bold text-base text-text leading-tight">{site.name}</h3>
+            <h3 className="font-bold text-base text-text leading-tight line-clamp-1">{displayName}</h3>
             <a 
               href={site.url} 
               target="_blank" 
@@ -147,23 +153,23 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck })
          {status === ConnectivityStatus.PENDING && (
            <div className="flex items-center gap-2 text-xs text-primary animate-pulse">
              <RefreshCw className="w-3 h-3 animate-spin" />
-             <span>Pinging...</span>
+             <span>{t.status_pinging}</span>
            </div>
          )}
          {status === ConnectivityStatus.ERROR && (
            <div className="flex items-center gap-2 text-xs text-danger">
              <WifiOff className="w-3 h-3" />
-             <span>Unreachable</span>
+             <span>{t.status_unreachable}</span>
            </div>
          )}
          {status === ConnectivityStatus.TIMEOUT && (
            <div className="flex items-center gap-2 text-xs text-yellow-600 dark:text-yellow-500">
              <AlertCircle className="w-3 h-3" />
-             <span>Timeout</span>
+             <span>{t.status_timeout}</span>
            </div>
          )}
          {status === ConnectivityStatus.IDLE && (
-           <div className="text-xs text-muted/50">Waiting to check...</div>
+           <div className="text-xs text-muted/50">{t.status_waiting}</div>
          )}
       </div>
 
@@ -182,7 +188,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck })
       <button
         onClick={() => onCheck(site.id, site.url)}
         className="absolute inset-0 w-full h-full z-20 cursor-pointer outline-none"
-        aria-label={`Check ${site.name} again`}
+        aria-label={`${t.check_again} ${displayName}`}
       />
       
       {/* Background decorative elements */}

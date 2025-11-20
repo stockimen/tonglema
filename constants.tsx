@@ -1,108 +1,181 @@
 
-import { SiteConfig } from './types';
+import { SiteConfig, Language } from './types';
 
 export const SITES: SiteConfig[] = [
   {
     id: 'google',
     name: 'Google',
+    name_zh: '谷歌',
     url: 'https://www.google.com',
     category: 'Search',
   },
   {
     id: 'gemini',
     name: 'Gemini',
+    name_zh: 'Gemini (谷歌)',
     url: 'https://gemini.google.com',
     category: 'AI',
-    description: 'Google Advanced AI'
+    description: 'Google Advanced AI',
+    description_zh: '谷歌最强 AI 模型'
   },
   {
     id: 'chatgpt',
     name: 'ChatGPT',
+    name_zh: 'ChatGPT',
     url: 'https://chatgpt.com',
     category: 'AI',
   },
   {
     id: 'claude',
     name: 'Claude',
+    name_zh: 'Claude',
     url: 'https://claude.ai',
     category: 'AI',
   },
   {
     id: 'midjourney',
     name: 'Midjourney',
+    name_zh: 'Midjourney',
     url: 'https://www.midjourney.com',
     category: 'AI',
   },
   {
     id: 'youtube',
     name: 'YouTube',
+    name_zh: '油管 (YouTube)',
     url: 'https://www.youtube.com',
     category: 'Media',
   },
   {
     id: 'twitter',
     name: 'Twitter / X',
+    name_zh: '推特 (X)',
     url: 'https://twitter.com',
     category: 'Social',
   },
   {
     id: 'github',
     name: 'GitHub',
+    name_zh: 'GitHub',
     url: 'https://github.com',
     category: 'Dev',
   },
   {
     id: 'reddit',
     name: 'Reddit',
+    name_zh: 'Reddit',
     url: 'https://www.reddit.com',
     category: 'Social',
   },
   {
     id: 'wikipedia',
     name: 'Wikipedia',
+    name_zh: '维基百科',
     url: 'https://www.wikipedia.org',
     category: 'Search',
   },
   {
     id: 'netflix',
     name: 'Netflix',
+    name_zh: '奈飞 (Netflix)',
     url: 'https://www.netflix.com',
     category: 'Media',
   },
   {
     id: 'spotify',
     name: 'Spotify',
+    name_zh: '声破天 (Spotify)',
     url: 'https://www.spotify.com',
     category: 'Media',
   },
   {
     id: 'telegram',
     name: 'Telegram',
+    name_zh: '电报 (Telegram)',
     url: 'https://telegram.org',
     category: 'Social',
   },
   {
     id: 'discord',
     name: 'Discord',
+    name_zh: 'Discord',
     url: 'https://discord.com',
     category: 'Social',
   },
   {
     id: 'aws',
     name: 'AWS Console',
+    name_zh: '亚马逊云 (AWS)',
     url: 'https://aws.amazon.com',
     category: 'Dev',
   },
   {
     id: 'stackoverflow',
     name: 'Stack Overflow',
+    name_zh: 'Stack Overflow',
     url: 'https://stackoverflow.com',
     category: 'Dev',
   },
   {
     id: 'twitch',
     name: 'Twitch',
+    name_zh: 'Twitch',
     url: 'https://www.twitch.tv',
     category: 'Media',
   }
 ];
+
+export const TRANSLATIONS = {
+  en: {
+    app_title: 'TongLeMa',
+    app_subtitle: 'Network Connectivity Monitor',
+    last_update: 'Last Update',
+    check_now: 'Check Now',
+    scanning: 'Scanning',
+    services_online: 'Services Online',
+    avg_latency: 'Avg. Latency',
+    network_mode: 'Network Mode',
+    browser_proxy: 'Browser Proxy',
+    footer_text: 'Real-time connectivity dashboard. Checks are performed directly from your browser via encrypted HEAD requests.',
+    status_pinging: 'Pinging...',
+    status_unreachable: 'Unreachable',
+    status_timeout: 'Timeout',
+    status_waiting: 'Waiting to check...',
+    manual: 'Manual',
+    check_again: 'Check again',
+    categories: {
+      Search: 'Search',
+      Social: 'Social',
+      AI: 'AI',
+      Media: 'Media',
+      Dev: 'Dev',
+      Other: 'Other'
+    }
+  },
+  zh: {
+    app_title: '通了吗',
+    app_subtitle: '网络连通性实时监控',
+    last_update: '上次更新',
+    check_now: '立即检测',
+    scanning: '检测中',
+    services_online: '在线服务',
+    avg_latency: '平均延迟',
+    network_mode: '检测模式',
+    browser_proxy: '浏览器/代理',
+    footer_text: '实时连通性仪表盘。检测直接通过您的浏览器发起（加密 HEAD 请求），结果反映您当前的本地网络环境。',
+    status_pinging: '检测中...',
+    status_unreachable: '无法访问',
+    status_timeout: '连接超时',
+    status_waiting: '等待检测...',
+    manual: '手动',
+    check_again: '重新检测',
+    categories: {
+      Search: '搜索引擎',
+      Social: '社交媒体',
+      AI: '人工智能',
+      Media: '流媒体',
+      Dev: '开发工具',
+      Other: '其他'
+    }
+  }
+};
