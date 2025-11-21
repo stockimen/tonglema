@@ -2,6 +2,7 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Header } from './components/Header';
 import { StatusCard } from './components/StatusCard';
+import { GridLayout } from './components/GridLayout';
 import { SITES, TRANSLATIONS } from './constants';
 import { checkConnectivity } from './services/networkService';
 import { detectLocation } from './services/locationService';
@@ -80,6 +81,15 @@ export default function App() {
     return false;
   });
 
+  // Initialize layout mode from localStorage
+  const [layoutMode, setLayoutMode] = useState<'card' | 'grid'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('layoutMode');
+      return (saved === 'grid' || saved === 'card') ? saved : 'card';
+    }
+    return 'card';
+  });
+
   // Location detection state
   const [locationInfo, setLocationInfo] = useState<LocationInfo | null>(null);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
@@ -144,6 +154,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('showColorMode', showColorMode.toString());
   }, [showColorMode]);
+
+  useEffect(() => {
+    localStorage.setItem('layoutMode', layoutMode);
+  }, [layoutMode]);
 
   // Toggle Language
   const toggleLang = useCallback(() => {
@@ -362,6 +376,8 @@ export default function App() {
         toggleLang={toggleLang}
         showColorMode={showColorMode}
         setShowColorMode={setShowColorMode}
+        layoutMode={layoutMode}
+        setLayoutMode={setLayoutMode}
       />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8 space-y-10">
@@ -535,71 +551,127 @@ export default function App() {
         </div>
 
         {/* Grouped Sections */}
-        <div className="space-y-10">
-          {CATEGORY_ORDER.map(category => {
-            const categorySites = groupedSites[category];
-            if (!categorySites) return null;
+        {layoutMode === 'card' ? (
+          <div className="space-y-10">
+            {CATEGORY_ORDER.map(category => {
+              const categorySites = groupedSites[category];
+              if (!categorySites) return null;
 
-            // Translate Category Name
-            const displayCategory = t.categories[category as keyof typeof t.categories] || category;
+              // Translate Category Name
+              const displayCategory = t.categories[category as keyof typeof t.categories] || category;
 
-            return (
-              <div key={category} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <div className="flex items-center gap-3 mb-5">
-                  <h2 className="text-lg font-bold text-text flex items-center gap-2 bg-surface/50 px-3 py-1 rounded-lg border border-border/50 backdrop-blur-sm">
-                    {category === 'AI' && <Layers className="w-4 h-4 text-primary" />}
-                    {displayCategory}
-                    <span className="text-xs font-normal text-muted/70 ml-1">({categorySites.length})</span>
-                  </h2>
-                  <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent"></div>
+              return (
+                <div key={category} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  <div className="flex items-center gap-3 mb-5">
+                    <h2 className="text-lg font-bold text-text flex items-center gap-2 bg-surface/50 px-3 py-1 rounded-lg border border-border/50 backdrop-blur-sm">
+                      {category === 'AI' && <Layers className="w-4 h-4 text-primary" />}
+                      {displayCategory}
+                      <span className="text-xs font-normal text-muted/70 ml-1">({categorySites.length})</span>
+                    </h2>
+                    <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent"></div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    {categorySites.map((site) => (
+                      <StatusCard
+                        key={site.id}
+                        site={site}
+                        result={results[site.id]}
+                        onCheck={handleCheckSite}
+                        lang={lang}
+                        isRefreshing={refreshingIds.has(site.id)}
+                        showColorMode={showColorMode}
+                      />
+                    ))}
+                  </div>
                 </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                  {categorySites.map((site) => (
-                    <StatusCard
-                      key={site.id}
-                      site={site}
-                      result={results[site.id]}
-                      onCheck={handleCheckSite}
-                      lang={lang}
-                      isRefreshing={refreshingIds.has(site.id)}
-                      showColorMode={showColorMode}
-                    />
-                  ))}
+              );
+            })}
+            
+            {/* Render any categories not in the explicit order list */}
+            {Object.keys(groupedSites).filter(cat => !CATEGORY_ORDER.includes(cat)).map(category => {
+              const categorySites = groupedSites[category];
+              return (
+               <div key={category} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  <div className="flex items-center gap-3 mb-5">
+                     <h2 className="text-lg font-bold text-text flex items-center gap-2 bg-surface/50 px-3 py-1 rounded-lg border border-border/50 backdrop-blur-sm">
+                      {t.categories[category as keyof typeof t.categories] || category}
+                      <span className="text-xs font-normal text-muted/70 ml-1">({categorySites.length})</span>
+                    </h2>
+                    <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent"></div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    {categorySites.map((site) => (
+                      <StatusCard
+                        key={site.id}
+                        site={site}
+                        result={results[site.id]}
+                        onCheck={handleCheckSite}
+                        lang={lang}
+                        isRefreshing={refreshingIds.has(site.id)}
+                        showColorMode={showColorMode}
+                      />
+                    ))}
+                  </div>
+               </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {CATEGORY_ORDER.map(category => {
+              const categorySites = groupedSites[category];
+              if (!categorySites) return null;
+
+              // Translate Category Name
+              const displayCategory = t.categories[category as keyof typeof t.categories] || category;
+
+              return (
+                <div key={category} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  <div className="flex items-center gap-3 mb-4">
+                    <h2 className="text-base font-bold text-text flex items-center gap-2 bg-surface/50 px-3 py-1 rounded-lg border border-border/50 backdrop-blur-sm">
+                      {category === 'AI' && <Layers className="w-3.5 h-3.5 text-primary" />}
+                      {displayCategory}
+                      <span className="text-xs font-normal text-muted/70 ml-1">({categorySites.length})</span>
+                    </h2>
+                    <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent"></div>
+                  </div>
+                  
+                  <GridLayout
+                    sites={categorySites}
+                    results={results}
+                    onCheck={handleCheckSite}
+                    isRefreshing={(siteId) => refreshingIds.has(siteId)}
+                    showColorMode={showColorMode}
+                  />
                 </div>
-              </div>
-            );
-          })}
-          
-          {/* Render any categories not in the explicit order list */}
-          {Object.keys(groupedSites).filter(cat => !CATEGORY_ORDER.includes(cat)).map(category => {
-            const categorySites = groupedSites[category];
-            return (
-             <div key={category} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <div className="flex items-center gap-3 mb-5">
-                   <h2 className="text-lg font-bold text-text flex items-center gap-2 bg-surface/50 px-3 py-1 rounded-lg border border-border/50 backdrop-blur-sm">
-                    {t.categories[category as keyof typeof t.categories] || category}
-                    <span className="text-xs font-normal text-muted/70 ml-1">({categorySites.length})</span>
-                  </h2>
-                  <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent"></div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                  {categorySites.map((site) => (
-                    <StatusCard
-                      key={site.id}
-                      site={site}
-                      result={results[site.id]}
-                      onCheck={handleCheckSite}
-                      lang={lang}
-                      isRefreshing={refreshingIds.has(site.id)}
-                      showColorMode={showColorMode}
-                    />
-                  ))}
-                </div>
-             </div>
-            );
-          })}
-        </div>
+              );
+            })}
+            
+            {/* Render any categories not in the explicit order list */}
+            {Object.keys(groupedSites).filter(cat => !CATEGORY_ORDER.includes(cat)).map(category => {
+              const categorySites = groupedSites[category];
+              return (
+               <div key={category} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  <div className="flex items-center gap-3 mb-4">
+                     <h2 className="text-base font-bold text-text flex items-center gap-2 bg-surface/50 px-3 py-1 rounded-lg border border-border/50 backdrop-blur-sm">
+                      {t.categories[category as keyof typeof t.categories] || category}
+                      <span className="text-xs font-normal text-muted/70 ml-1">({categorySites.length})</span>
+                    </h2>
+                    <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent"></div>
+                  </div>
+                  <GridLayout
+                    sites={categorySites}
+                    results={results}
+                    onCheck={handleCheckSite}
+                    isRefreshing={(siteId) => refreshingIds.has(siteId)}
+                    showColorMode={showColorMode}
+                  />
+               </div>
+              );
+            })}
+          </div>
+        )}
 
       </main>
 

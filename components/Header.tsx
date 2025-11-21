@@ -1,6 +1,6 @@
 
 import React, { memo, useMemo } from 'react';
-import { Activity, Play, RefreshCw, Sun, Moon, Clock, Languages, Palette } from 'lucide-react';
+import { Activity, Play, RefreshCw, Sun, Moon, Clock, Languages, Palette, Grid3x3, LayoutGrid } from 'lucide-react';
 import { Language } from '../types';
 import { TRANSLATIONS } from '../constants';
 
@@ -16,6 +16,8 @@ interface HeaderProps {
   toggleLang: () => void;
   showColorMode: boolean;
   setShowColorMode: (show: boolean) => void;
+  layoutMode: 'card' | 'grid';
+  setLayoutMode: (mode: 'card' | 'grid') => void;
 }
 
 const INTERVAL_OPTIONS = [
@@ -38,7 +40,9 @@ export const Header: React.FC<HeaderProps> = memo(({
   lang,
   toggleLang,
   showColorMode,
-  setShowColorMode
+  setShowColorMode,
+  layoutMode,
+  setLayoutMode
 }) => {
   const t = useMemo(() => TRANSLATIONS[lang], [lang]);
 
@@ -92,6 +96,21 @@ export const Header: React.FC<HeaderProps> = memo(({
             >
               <Palette className="w-4 h-4" />
             </button>
+            <button
+              onClick={() => setLayoutMode(layoutMode === 'card' ? 'grid' : 'card')}
+              className={`p-2 rounded-lg bg-surface border border-border transition-colors ${
+                layoutMode === 'grid'
+                  ? 'text-primary border-primary/30' 
+                  : 'text-text hover:bg-muted/10'
+              }`}
+              title={layoutMode === 'card' ? 'Switch to grid layout' : 'Switch to card layout'}
+            >
+              {layoutMode === 'card' ? (
+                <Grid3x3 className="w-4 h-4" />
+              ) : (
+                <LayoutGrid className="w-4 h-4" />
+              )}
+            </button>
           </div>
         </div>
 
@@ -128,6 +147,23 @@ export const Header: React.FC<HeaderProps> = memo(({
               title={t.show_color_mode_desc}
             >
               <Palette className="w-4 h-4" />
+            </button>
+
+            <button
+              onClick={() => setLayoutMode(layoutMode === 'card' ? 'grid' : 'card')}
+              className={`p-2 rounded-lg transition-colors ${
+                layoutMode === 'grid'
+                  ? 'text-primary bg-primary/10 hover:bg-primary/15' 
+                  : 'text-muted hover:text-text hover:bg-surface'
+              }`}
+              aria-label={layoutMode === 'card' ? 'Switch to grid layout' : 'Switch to card layout'}
+              title={layoutMode === 'card' ? 'Switch to grid layout' : 'Switch to card layout'}
+            >
+              {layoutMode === 'card' ? (
+                <Grid3x3 className="w-4 h-4" />
+              ) : (
+                <LayoutGrid className="w-4 h-4" />
+              )}
             </button>
           </div>
 
