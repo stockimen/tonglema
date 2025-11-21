@@ -341,6 +341,81 @@ export default function App() {
           </div>
         </div>
 
+        {/* Color Legend */}
+        <div className="bg-surface border border-border rounded-xl p-3">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+            {/* Unreachable */}
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-muted/20 border border-border grayscale-[50%] opacity-85 flex items-center justify-center shrink-0">
+                <div className="w-2 h-2 rounded-full bg-muted/50"></div>
+              </div>
+              <div>
+                <p className="text-[11px] font-medium text-text leading-tight">{t.legend_unreachable}</p>
+                <p className="text-[10px] text-muted/70 leading-tight">{t.legend_unreachable_desc}</p>
+              </div>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-0.5 rounded-full bg-black/5 dark:bg-white/5 overflow-hidden shrink-0">
+                <div className="h-full w-full bg-success"></div>
+              </div>
+              <div>
+                <p className="text-[11px] font-medium text-text leading-tight">{t.legend_progress_bar}</p>
+                <p className="text-[10px] text-muted/70 leading-tight">{t.legend_progress_bar_desc}</p>
+              </div>
+            </div>
+
+            {/* Color Mode Colors (only show when enabled) */}
+            {showColorMode && (
+              <>
+                <div className="h-6 w-px bg-border/50"></div>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-6 h-6 rounded border border-green-500/40 bg-surface flex items-center justify-center shrink-0">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium text-green-600 dark:text-green-400 leading-tight">{t.legend_fast}</p>
+                      <p className="text-[10px] text-muted/70 leading-tight">&lt; 200ms</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-6 h-6 rounded border border-green-400/40 bg-surface flex items-center justify-center shrink-0">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium text-green-500 dark:text-green-300 leading-tight">{t.legend_medium}</p>
+                      <p className="text-[10px] text-muted/70 leading-tight">200-500ms</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-6 h-6 rounded border border-yellow-500/40 bg-surface flex items-center justify-center shrink-0">
+                      <div className="w-1.5 h-1.5 rounded-full bg-yellow-500"></div>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium text-yellow-600 dark:text-yellow-400 leading-tight">{t.legend_slow}</p>
+                      <p className="text-[10px] text-muted/70 leading-tight">500-800ms</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-6 h-6 rounded border border-orange-500/40 bg-surface flex items-center justify-center shrink-0">
+                      <div className="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium text-orange-600 dark:text-orange-400 leading-tight">{t.legend_very_slow}</p>
+                      <p className="text-[10px] text-muted/70 leading-tight">&gt; 800ms</p>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
         {/* Grouped Sections */}
         <div className="space-y-10">
           {CATEGORY_ORDER.map(category => {
@@ -356,6 +431,7 @@ export default function App() {
                   <h2 className="text-lg font-bold text-text flex items-center gap-2 bg-surface/50 px-3 py-1 rounded-lg border border-border/50 backdrop-blur-sm">
                     {category === 'AI' && <Layers className="w-4 h-4 text-primary" />}
                     {displayCategory}
+                    <span className="text-xs font-normal text-muted/70 ml-1">({categorySites.length})</span>
                   </h2>
                   <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent"></div>
                 </div>
@@ -378,16 +454,19 @@ export default function App() {
           })}
           
           {/* Render any categories not in the explicit order list */}
-          {Object.keys(groupedSites).filter(cat => !CATEGORY_ORDER.includes(cat)).map(category => (
+          {Object.keys(groupedSites).filter(cat => !CATEGORY_ORDER.includes(cat)).map(category => {
+            const categorySites = groupedSites[category];
+            return (
              <div key={category} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <div className="flex items-center gap-3 mb-5">
                    <h2 className="text-lg font-bold text-text flex items-center gap-2 bg-surface/50 px-3 py-1 rounded-lg border border-border/50 backdrop-blur-sm">
                     {t.categories[category as keyof typeof t.categories] || category}
+                    <span className="text-xs font-normal text-muted/70 ml-1">({categorySites.length})</span>
                   </h2>
                   <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent"></div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                  {groupedSites[category].map((site) => (
+                  {categorySites.map((site) => (
                     <StatusCard
                       key={site.id}
                       site={site}
@@ -400,7 +479,8 @@ export default function App() {
                   ))}
                 </div>
              </div>
-          ))}
+            );
+          })}
         </div>
 
       </main>

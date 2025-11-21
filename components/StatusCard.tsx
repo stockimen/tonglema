@@ -50,11 +50,11 @@ export const StatusCard: React.FC<StatusCardProps> = memo(({ site, result, onChe
         };
       case ConnectivityStatus.ERROR:
         return {
-          border: 'border-danger/60',
-          bg: 'bg-surface',
-          indicator: 'bg-danger',
+          border: 'border-border',
+          bg: 'bg-muted/20',
+          indicator: 'bg-muted/50',
           glow: '',
-          text: 'text-danger'
+          text: 'text-muted/70'
         };
       case ConnectivityStatus.SUCCESS:
         // 如果开启了颜色模式，根据延迟显示不同颜色
@@ -71,7 +71,7 @@ export const StatusCard: React.FC<StatusCardProps> = memo(({ site, result, onChe
           if (latency < 500) {
             return {
               border: 'border-green-400/40',
-              bg: 'bg-surface',
+          bg: 'bg-surface',
               indicator: 'bg-green-400',
               glow: '',
               text: 'text-green-500 dark:text-green-300'
@@ -80,11 +80,11 @@ export const StatusCard: React.FC<StatusCardProps> = memo(({ site, result, onChe
           if (latency < 800) {
             return {
               border: 'border-yellow-500/40',
-              bg: 'bg-surface',
-              indicator: 'bg-yellow-500',
+          bg: 'bg-surface',
+          indicator: 'bg-yellow-500',
               glow: '',
-              text: 'text-yellow-600 dark:text-yellow-400'
-            };
+          text: 'text-yellow-600 dark:text-yellow-400'
+        };
           }
           return {
             border: 'border-orange-500/40',
@@ -119,7 +119,9 @@ export const StatusCard: React.FC<StatusCardProps> = memo(({ site, result, onChe
     }
   }, [site.url, site.iconUrl]);
 
-  const latencyPercent = Math.min((latency / 1000) * 100, 100);
+  // 反转逻辑：延迟越低（越快），进度条越满
+  // 0ms = 100%, 500ms = 50%, 1000ms+ = 0%
+  const latencyPercent = Math.max((1000 - latency) / 1000 * 100, 0);
 
   // Status Indicator logic:
   // If refreshing, show spinner in status dot area.
@@ -130,6 +132,8 @@ export const StatusCard: React.FC<StatusCardProps> = memo(({ site, result, onChe
     }
     return <div className={`w-2 h-2 rounded-full ${styles.indicator} shadow-sm ring-1 ring-background/10`} />;
   };
+
+  const isError = status === ConnectivityStatus.ERROR;
 
   return (
     <motion.div
@@ -142,6 +146,7 @@ export const StatusCard: React.FC<StatusCardProps> = memo(({ site, result, onChe
         rounded-xl border ${styles.border} ${styles.bg} ${styles.glow}
         transition-all duration-300 flex flex-col h-[96px]
         z-10
+        ${isError ? 'grayscale-[50%] opacity-85' : ''}
       `}
     >
       {/* Content Wrapper: z-30 + pointer-events-none to sit above button (z-20) but let clicks pass through */}
@@ -211,7 +216,7 @@ export const StatusCard: React.FC<StatusCardProps> = memo(({ site, result, onChe
          )}
          
          {status === ConnectivityStatus.ERROR && !isRefreshing && (
-           <div className="flex items-center gap-1.5 text-[11px] text-danger">
+           <div className="flex items-center gap-1.5 text-[11px] text-muted/80">
              <WifiOff className="w-2.5 h-2.5" />
              <span>{t.status_unreachable}</span>
            </div>
