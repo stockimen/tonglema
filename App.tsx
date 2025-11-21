@@ -7,7 +7,7 @@ import { SITES, TRANSLATIONS } from './constants';
 import { checkConnectivity } from './services/networkService';
 import { detectLocation } from './services/locationService';
 import { CheckResult, ConnectivityStatus, CheckResultMap, SiteConfig, Language, LocationInfo } from './types';
-import { Shield, Globe2, Info, Layers, Lock, Github, MapPin } from 'lucide-react';
+import { Shield, Globe2, Info, Layers, Lock, Github, MapPin, Eye, EyeOff } from 'lucide-react';
 
 /**
  * 将国家代码转换为国旗 emoji
@@ -90,6 +90,15 @@ export default function App() {
     return 'card';
   });
 
+  // Initialize focus mode from localStorage
+  const [focusMode, setFocusMode] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('focusMode');
+      return saved === 'true';
+    }
+    return false;
+  });
+
   // Location detection state
   const [locationInfo, setLocationInfo] = useState<LocationInfo | null>(null);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
@@ -158,6 +167,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('layoutMode', layoutMode);
   }, [layoutMode]);
+
+  useEffect(() => {
+    localStorage.setItem('focusMode', focusMode.toString());
+  }, [focusMode]);
 
   // Toggle Language
   const toggleLang = useCallback(() => {
@@ -364,26 +377,30 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-background text-text flex flex-col transition-colors duration-500">
-      <Header 
-        onCheckAll={handleCheckAll} 
-        isChecking={isChecking} 
-        lastChecked={lastChecked}
-        theme={theme}
-        toggleTheme={toggleTheme}
-        refreshInterval={refreshInterval}
-        setRefreshInterval={setRefreshInterval}
-        lang={lang}
-        toggleLang={toggleLang}
-        showColorMode={showColorMode}
-        setShowColorMode={setShowColorMode}
-        layoutMode={layoutMode}
-        setLayoutMode={setLayoutMode}
-      />
+      {!focusMode && (
+        <Header 
+          onCheckAll={handleCheckAll} 
+          isChecking={isChecking} 
+          lastChecked={lastChecked}
+          theme={theme}
+          toggleTheme={toggleTheme}
+          refreshInterval={refreshInterval}
+          setRefreshInterval={setRefreshInterval}
+          lang={lang}
+          toggleLang={toggleLang}
+          showColorMode={showColorMode}
+          setShowColorMode={setShowColorMode}
+          layoutMode={layoutMode}
+          setLayoutMode={setLayoutMode}
+        />
+      )}
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8 space-y-10">
+      <main className={`flex-1 w-full ${focusMode ? 'max-w-full' : 'max-w-7xl'} mx-auto px-4 py-8 space-y-10`}>
         
-        {/* Overview Dashboard */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {!focusMode && (
+          <>
+            {/* Overview Dashboard */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-surface border border-border rounded-xl p-4 flex items-center gap-4 transition-colors">
              <div className="p-2 rounded-lg bg-success/10 border border-success/20">
                <Shield className="w-5 h-5 text-success" />
@@ -549,6 +566,8 @@ export default function App() {
             </div>
           </div>
         </div>
+        </>
+        )}
 
         {/* Grouped Sections */}
         {layoutMode === 'card' ? (
@@ -675,7 +694,8 @@ export default function App() {
 
       </main>
 
-      <footer className="py-10 border-t border-border mt-auto bg-surface/30 backdrop-blur-lg">
+      {!focusMode && (
+        <footer className="py-10 border-t border-border mt-auto bg-surface/30 backdrop-blur-lg">
         <div className="max-w-7xl mx-auto px-4 text-center flex flex-col items-center gap-4">
           <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-surface border border-border shadow-sm">
              <Lock className="w-3 h-3 text-success" />
@@ -704,6 +724,31 @@ export default function App() {
           </div>
         </div>
       </footer>
+      )}
+
+      {/* 纯静模式切换按钮 */}
+      <button
+        onClick={() => setFocusMode(!focusMode)}
+        className={`
+          fixed bottom-6 right-6 z-50
+          w-14 h-14 rounded-full
+          flex items-center justify-center
+          shadow-lg transition-all duration-300
+          ${focusMode 
+            ? 'bg-primary text-white hover:bg-primary/90' 
+            : 'bg-surface border-2 border-border text-text hover:bg-muted/10'
+          }
+          focus:outline-none focus:ring-2 focus:ring-primary/50
+        `}
+        aria-label={focusMode ? '退出纯静模式' : '进入纯静模式'}
+        title={focusMode ? '退出纯静模式' : '进入纯静模式'}
+      >
+        {focusMode ? (
+          <EyeOff className="w-6 h-6" />
+        ) : (
+          <Eye className="w-6 h-6" />
+        )}
+      </button>
     </div>
   );
 }
