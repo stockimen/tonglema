@@ -401,7 +401,7 @@ export default function App() {
           <>
             {/* Overview Dashboard */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-surface border border-border rounded-xl p-4 flex items-center gap-4 transition-colors">
+          <div className="bg-surface/50 backdrop-blur-sm border border-border rounded-2xl p-6 flex items-center gap-5 shadow-sm hover:shadow-md transition-shadow">
              <div className="p-2 rounded-lg bg-success/10 border border-success/20">
                <Shield className="w-5 h-5 text-success" />
              </div>
@@ -413,7 +413,7 @@ export default function App() {
                </div>
              </div>
           </div>
-          <div className="bg-surface border border-border rounded-xl p-4 flex items-center gap-4 transition-colors">
+          <div className="bg-surface/50 backdrop-blur-sm border border-border rounded-2xl p-6 flex items-center gap-5 shadow-sm hover:shadow-md transition-shadow">
              <div className="p-2 rounded-lg bg-orange-500/10 border border-orange-500/20">
                <Globe2 className="w-5 h-5 text-orange-500" />
              </div>
@@ -425,7 +425,7 @@ export default function App() {
                </div>
              </div>
           </div>
-          <div className="bg-surface border border-border rounded-xl p-4 flex items-center gap-4 transition-colors">
+          <div className="bg-surface/50 backdrop-blur-sm border border-border rounded-2xl p-6 flex items-center gap-5 shadow-sm hover:shadow-md transition-shadow">
              <div className="p-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
                <Info className="w-5 h-5 text-purple-500" />
              </div>
@@ -436,7 +436,7 @@ export default function App() {
                </div>
              </div>
           </div>
-          <div className="bg-surface border border-border rounded-xl p-4 flex items-center gap-4 transition-colors">
+          <div className="bg-surface/50 backdrop-blur-sm border border-border rounded-2xl p-6 flex items-center gap-5 shadow-sm hover:shadow-md transition-shadow">
              <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
                <MapPin className="w-5 h-5 text-primary" />
              </div>
