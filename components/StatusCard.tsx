@@ -122,7 +122,7 @@ export const StatusCard: React.FC<StatusCardProps> = memo(({ site, result, onChe
     if (site.iconUrl) return site.iconUrl;
     try {
       const urlObj = new URL(site.url);
-      return `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=128`;
+      return `https://www.faviconextractor.com/favicon/${urlObj.hostname}`;
     } catch (e) {
       return '';
     }
@@ -176,7 +176,7 @@ export const StatusCard: React.FC<StatusCardProps> = memo(({ site, result, onChe
                 } else if (site.iconUrl && target.src === site.iconUrl) {
                    // If custom icon failed, try google fallback
                    try {
-                     target.src = `https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=128`;
+                     target.src = `https://www.faviconextractor.com/favicon/${new URL(site.url).hostname}`;
                    } catch {
                      target.style.display = 'none';
                    }
