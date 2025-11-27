@@ -3,10 +3,12 @@ import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Header } from './components/Header';
 import { StatusCard } from './components/StatusCard';
 import { GridLayout } from './components/GridLayout';
+import { SitesSettingsModal } from './components/SitesSettingsModal';
+import { useSitesManager } from './components/useSitesManager';
 import { SITES, TRANSLATIONS } from './constants';
 import { checkConnectivity } from './services/networkService';
 import { detectLocation } from './services/locationService';
-import { CheckResult, ConnectivityStatus, CheckResultMap, SiteConfig, Language, LocationInfo } from './types';
+import { CheckResult, ConnectivityStatus, CheckResultMap, SiteConfig, Language, LocationInfo, CategoryConfig } from './types';
 import { Shield, Globe2, Info, Layers, Lock, Github, MapPin, Eye, EyeOff } from 'lucide-react';
 
 /**
@@ -35,6 +37,12 @@ export default function App() {
   const [refreshingIds, setRefreshingIds] = useState<Set<string>>(new Set());
   // 使用 ref 跟踪检查状态，避免 handleCheckAll 依赖变化
   const isCheckingRef = useRef(false);
+
+  // 使用自定义hook管理网站数据和分类
+  const { data: sitesData, sites, categories } = useSitesManager();
+
+  // 设置管理模态框
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   
   // Initialize lastChecked from localStorage
   const [lastChecked, setLastChecked] = useState<number | null>(() => {
@@ -251,18 +259,18 @@ export default function App() {
   // Function to check all sites
   const handleCheckAll = useCallback(async () => {
     if (isCheckingRef.current) return;
-    
+
     isCheckingRef.current = true;
     setIsChecking(true);
     setLastChecked(Date.now());
 
     // Mark all as refreshing
-    setRefreshingIds(new Set(SITES.map(s => s.id)));
+    setRefreshingIds(new Set(sites.map(s => s.id)));
 
     // Initialize IDLE/Missing sites to PENDING visual state
     setResults(prev => {
       const next = { ...prev };
-      SITES.forEach(site => {
+      sites.forEach(site => {
         // Only mark as pending if not already existing to avoid flashing
         if (!next[site.id]) {
            next[site.id] = {
@@ -287,9 +295,9 @@ export default function App() {
     }
 
     // Execute in batches
-    const batchSize = 6; 
-    for (let i = 0; i < SITES.length; i += batchSize) {
-      const batch = SITES.slice(i, i + batchSize);
+    const batchSize = 6;
+    for (let i = 0; i < sites.length; i += batchSize) {
+      const batch = sites.slice(i, i + batchSize);
       const promises = batch.map(site => checkConnectivity(site));
       const batchResults = await Promise.all(promises);
       
@@ -363,14 +371,14 @@ export default function App() {
     return stats.count > 0 ? Math.round(stats.avgLatency / stats.count) : 0;
   }, [stats]);
 
-  // 使用 useMemo 缓存分组结果，SITES 是常量，只在首次渲染时计算
+  // 使用 useMemo 缓存分组结果，依赖 sites 数据
   const groupedSites = useMemo(() => {
-    return SITES.reduce<Record<string, SiteConfig[]>>((acc, site) => {
+    return sites.reduce<Record<string, SiteConfig[]>>((acc, site) => {
       if (!acc[site.category]) acc[site.category] = [];
       acc[site.category].push(site);
       return acc;
     }, {});
-  }, []);
+  }, [sites]);
 
   // 使用 useMemo 缓存翻译对象
   const t = useMemo(() => TRANSLATIONS[lang], [lang]);
@@ -392,6 +400,7 @@ export default function App() {
           setShowColorMode={setShowColorMode}
           layoutMode={layoutMode}
           setLayoutMode={setLayoutMode}
+          onSettings={() => setShowSettingsModal(true)}
         />
       )}
 
@@ -409,7 +418,7 @@ export default function App() {
                <p className="text-xs font-medium text-muted uppercase tracking-wider">{t.services_online}</p>
                <div className="flex items-baseline gap-2">
                  <p className="text-2xl font-bold text-text">{stats.online}</p>
-                 <span className="text-muted text-xs">/ {SITES.length}</span>
+                 <span className="text-muted text-xs">/ {sites.length}</span>
                </div>
              </div>
           </div>
@@ -693,6 +702,13 @@ export default function App() {
         )}
 
       </main>
+
+      {/* 网站设置模态框 */}
+      <SitesSettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+        lang={lang}
+      />
 
       {!focusMode && (
         <footer className="py-10 border-t border-border mt-auto bg-surface/30 backdrop-blur-lg">

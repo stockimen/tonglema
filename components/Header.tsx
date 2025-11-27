@@ -1,6 +1,6 @@
 
 import React, { memo, useMemo } from 'react';
-import { Activity, Play, RefreshCw, Sun, Moon, Clock, Languages, Palette, Grid3x3, LayoutGrid } from 'lucide-react';
+import { Activity, Play, RefreshCw, Sun, Moon, Clock, Languages, Palette, Grid3x3, LayoutGrid, Database } from 'lucide-react';
 import { Language } from '../types';
 import { TRANSLATIONS } from '../constants';
 
@@ -18,6 +18,7 @@ interface HeaderProps {
   setShowColorMode: (show: boolean) => void;
   layoutMode: 'card' | 'grid';
   setLayoutMode: (mode: 'card' | 'grid') => void;
+  onSettings: () => void;
 }
 
 const INTERVAL_OPTIONS = [
@@ -29,11 +30,11 @@ const INTERVAL_OPTIONS = [
   { label: '5m', label_zh: '5分', value: 300000 },
 ];
 
-export const Header: React.FC<HeaderProps> = memo(({ 
-  onCheckAll, 
-  isChecking, 
-  lastChecked, 
-  theme, 
+export const Header: React.FC<HeaderProps> = memo(({
+  onCheckAll,
+  isChecking,
+  lastChecked,
+  theme,
   toggleTheme,
   refreshInterval,
   setRefreshInterval,
@@ -42,7 +43,8 @@ export const Header: React.FC<HeaderProps> = memo(({
   showColorMode,
   setShowColorMode,
   layoutMode,
-  setLayoutMode
+  setLayoutMode,
+  onSettings
 }) => {
   const t = useMemo(() => TRANSLATIONS[lang], [lang]);
 
@@ -164,6 +166,15 @@ export const Header: React.FC<HeaderProps> = memo(({
               ) : (
                 <LayoutGrid className="w-4 h-4" />
               )}
+            </button>
+
+            <button
+              onClick={onSettings}
+              className="p-2 rounded-lg text-muted hover:text-text hover:bg-surface transition-colors"
+              aria-label="Sites Settings"
+              title={lang === 'zh' ? '网站设置' : 'Sites Settings'}
+            >
+              <Database className="w-4 h-4" />
             </button>
           </div>
 

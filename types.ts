@@ -1,13 +1,26 @@
 
 export type Language = 'en' | 'zh';
 
+export interface CategoryConfig {
+  id: string;
+  name: string;
+  name_zh?: string;
+  color?: string; // Tailwind CSS color class
+}
+
+export interface SitesData {
+  categories: CategoryConfig[];
+  sites: SiteConfig[];
+  version: number;
+}
+
 export interface SiteConfig {
   id: string;
   name: string;
   name_zh?: string; // Chinese name
   url: string;
   iconUrl?: string; // Custom URL for favicon/icon detection and display
-  category: 'Search' | 'Social' | 'AI' | 'Media' | 'Dev' | 'Other';
+  category: 'Search' | 'Social' | 'AI' | 'Media' | 'Dev' | 'Other' | string;
   description?: string;
   description_zh?: string; // Chinese description
 }
