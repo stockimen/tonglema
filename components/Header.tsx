@@ -1,6 +1,18 @@
 
 import React, { memo, useMemo } from 'react';
-import { Activity, Play, RefreshCw, Sun, Moon, Clock, Languages, Palette, Grid3x3, LayoutGrid, Database } from 'lucide-react';
+import {
+  Activity,
+  Play,
+  RefreshCw,
+  Sun,
+  Moon,
+  Clock,
+  Languages,
+  Palette,
+  Grid3x3,
+  LayoutGrid,
+  Bolt
+} from 'lucide-react';
 import { Language } from '../types';
 import { TRANSLATIONS } from '../constants';
 
@@ -174,7 +186,7 @@ export const Header: React.FC<HeaderProps> = memo(({
               aria-label="Sites Settings"
               title={lang === 'zh' ? '网站设置' : 'Sites Settings'}
             >
-              <Database className="w-4 h-4" />
+              <Bolt className="w-4 h-4" />
             </button>
           </div>
 
@@ -195,6 +207,15 @@ export const Header: React.FC<HeaderProps> = memo(({
             )}
 
             <div className="flex items-center gap-2">
+              <button
+                  onClick={onSettings}
+                  className="p-2 rounded-lg text-muted hover:text-text hover:bg-surface transition-colors md:hidden"
+                  aria-label="Sites Settings"
+                  title={lang === 'zh' ? '网站设置' : 'Sites Settings'}
+              >
+                <Bolt className="w-4 h-4" />
+              </button>
+
               {/* Auto Refresh Dropdown */}
               <div className="relative group">
                 <div className="absolute inset-y-0 left-2.5 flex items-center pointer-events-none text-muted">

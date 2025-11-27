@@ -260,6 +260,26 @@ export const SitesSettingsModal: React.FC<SitesSettingsModalProps> = ({ isOpen, 
                 </button>
               </div>
 
+              {/* Add Category Form */}
+              {showAddCategory && (
+                  <div className="mt-6 p-4 border border-border rounded-lg bg-surface/50">
+                    <h3 className="font-medium text-text mb-4">{lang === 'zh' ? '添加新分类' : 'Add New Category'}</h3>
+                    <CategoryEditor
+                        category={null}
+                        lang={lang}
+                        onSave={(newCategory) => {
+                          addCategory({
+                            name: newCategory.name,
+                            name_zh: newCategory.name_zh,
+                            color: newCategory.color
+                          });
+                          setShowAddCategory(false);
+                        }}
+                        onCancel={() => setShowAddCategory(false)}
+                    />
+                  </div>
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {categories.map(category => (
                   <div key={category.id} className="border border-border rounded-lg p-4">
@@ -307,25 +327,7 @@ export const SitesSettingsModal: React.FC<SitesSettingsModalProps> = ({ isOpen, 
                 ))}
               </div>
 
-              {/* Add Category Form */}
-              {showAddCategory && (
-                <div className="mt-6 p-4 border border-border rounded-lg bg-surface/50">
-                  <h3 className="font-medium text-text mb-4">{lang === 'zh' ? '添加新分类' : 'Add New Category'}</h3>
-                  <CategoryEditor
-                    category={null}
-                    lang={lang}
-                    onSave={(newCategory) => {
-                      addCategory({
-                        name: newCategory.name,
-                        name_zh: newCategory.name_zh,
-                        color: newCategory.color
-                      });
-                      setShowAddCategory(false);
-                    }}
-                    onCancel={() => setShowAddCategory(false)}
-                  />
-                </div>
-              )}
+
             </div>
           )}
         </div>

@@ -385,7 +385,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-background text-text flex flex-col transition-colors duration-500">
-      {!focusMode && (
+      {(
         <Header 
           onCheckAll={handleCheckAll} 
           isChecking={isChecking} 
@@ -742,7 +742,7 @@ export default function App() {
       </footer>
       )}
 
-      {/* 纯静模式切换按钮 */}
+      {/* 纯净模式切换按钮 */}
       <button
         onClick={() => setFocusMode(!focusMode)}
         className={`
@@ -756,8 +756,8 @@ export default function App() {
           }
           focus:outline-none focus:ring-2 focus:ring-primary/50
         `}
-        aria-label={focusMode ? '退出纯静模式' : '进入纯静模式'}
-        title={focusMode ? '退出纯静模式' : '进入纯静模式'}
+        aria-label={focusMode ? '退出纯净模式' : '进入纯净模式'}
+        title={focusMode ? '退出纯净模式' : '进入纯净模式'}
       >
         {focusMode ? (
           <EyeOff className="w-6 h-6" />
