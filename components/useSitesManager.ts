@@ -3,12 +3,12 @@ import { SITES } from '../constants';
 import { SiteConfig, CategoryConfig, SitesData } from '../types';
 
 const DEFAULT_CATEGORIES: CategoryConfig[] = [
-  { id: 'AI', name: 'AI', name_zh: '人工智能', color: 'bg-purple-500' },
-  { id: 'Search', name: 'Search', name_zh: '搜索引擎', color: 'bg-blue-500' },
-  { id: 'Social', name: 'Social', name_zh: '社交媒体', color: 'bg-green-500' },
-  { id: 'Media', name: 'Media', name_zh: '流媒体', color: 'bg-red-500' },
-  { id: 'Dev', name: 'Dev', name_zh: '开发工具', color: 'bg-yellow-500' },
-  { id: 'Other', name: 'Other', name_zh: '其他', color: 'bg-gray-500' }
+  { id: 'AI', name: 'AI', name_zh: '人工智能' },
+  { id: 'Search', name: 'Search', name_zh: '搜索引擎' },
+  { id: 'Social', name: 'Social', name_zh: '社交媒体' },
+  { id: 'Media', name: 'Media', name_zh: '流媒体' },
+  { id: 'Dev', name: 'Dev', name_zh: '开发工具' },
+  { id: 'Other', name: 'Other', name_zh: '其他' }
 ];
 
 const STORAGE_KEY = 'tonglema_custom_sites';
@@ -30,9 +30,14 @@ function loadSitesData(): SitesData {
   if (saved) {
     try {
       const data = JSON.parse(saved) as SitesData;
+      // 清理分类数据中的颜色字段，确保向后兼容
+      const cleanedCategories = (data.categories || DEFAULT_CATEGORIES).map(cat => {
+        const { color, ...cleanedCat } = cat;
+        return cleanedCat;
+      });
       // 确保数据结构完整性
       return {
-        categories: data.categories || DEFAULT_CATEGORIES,
+        categories: cleanedCategories,
         sites: data.sites || [],
         version: data.version || VERSION
       };
@@ -198,8 +203,13 @@ export function useSitesManager() {
       try {
         const imported = JSON.parse(e.target?.result as string) as SitesData;
         if (imported.sites && imported.categories) {
+          // 清理导入数据中的颜色字段
+          const cleanedCategories = imported.categories.map(cat => {
+            const { color, ...cleanedCat } = cat;
+            return cleanedCat;
+          });
           setData({
-            categories: imported.categories,
+            categories: cleanedCategories,
             sites: imported.sites,
             version: imported.version || VERSION
           });

@@ -10,6 +10,20 @@ interface SitesSettingsModalProps {
   lang: Language;
 }
 
+// 生成一致性的随机颜色（基于分类ID确保每次相同）
+const getRandomCategoryColor = (categoryId: string) => {
+  const colors = [
+    'bg-red-500', 'bg-pink-500', 'bg-purple-500', 'bg-indigo-500',
+    'bg-blue-500', 'bg-cyan-500', 'bg-teal-500', 'bg-green-500',
+    'bg-yellow-500', 'bg-orange-500', 'bg-gray-500', 'bg-black'
+  ];
+  let hash = 0;
+  for (let i = 0; i < categoryId.length; i++) {
+    hash = categoryId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+};
+
 export const SitesSettingsModal: React.FC<SitesSettingsModalProps> = ({ isOpen, onClose, lang }) => {
   const {
     data,
@@ -213,32 +227,50 @@ export const SitesSettingsModal: React.FC<SitesSettingsModalProps> = ({ isOpen, 
                       collapsedCategories.has(categoryId) ? 'max-h-0 overflow-hidden' : 'max-h-[calc(90vh-300px)] overflow-y-auto'
                     }`}>
                       {categorySites.map(site => (
-                        <div key={site.id} className="p-4 flex items-start justify-between hover:bg-muted/5 transition-colors">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-2">
-                              <div className="text-lg font-medium text-text">{lang === 'zh' ? (site.name_zh || site.name) : site.name}</div>
+                        <div key={site.id}>
+                          {editingSite === site.id ? (
+                            <div className="p-4 border border-border rounded-lg bg-surface/50">
+                              <h3 className="font-medium text-text mb-4">{lang === 'zh' ? '编辑网站' : 'Edit Site'}</h3>
+                              <SiteEditor
+                                site={site}
+                                categories={categories}
+                                lang={lang}
+                                onSave={(updates) => {
+                                  editSite(site.id, updates);
+                                  setEditingSite(null);
+                                }}
+                                onCancel={() => setEditingSite(null)}
+                              />
                             </div>
-                            <div className="text-xs text-muted flex items-center gap-2">
-                              <span>{site.url}</span>
-                              <span className="px-2 py-0.5 bg-surface border border-border rounded">
-                                {getCategoryName(site.category)}
-                              </span>
+                          ) : (
+                            <div className="p-4 flex items-start justify-between hover:bg-muted/5 transition-colors">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <div className="text-lg font-medium text-text">{lang === 'zh' ? (site.name_zh || site.name) : site.name}</div>
+                                </div>
+                                <div className="text-xs text-muted flex items-center gap-2">
+                                  <span>{site.url}</span>
+                                  <span className="px-2 py-0.5 bg-surface border border-border rounded">
+                                    {getCategoryName(site.category)}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 ml-4">
+                                <button
+                                  onClick={() => setEditingSite(site.id)}
+                                  className="p-2 text-muted hover:text-text rounded-lg hover:bg-muted/10"
+                                >
+                                  <Settings className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => deleteSite(site.id)}
+                                  className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-2 ml-4">
-                            <button
-                              onClick={() => setEditingSite(site.id)}
-                              className="p-2 text-muted hover:text-text rounded-lg hover:bg-muted/10"
-                            >
-                              <Settings className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => deleteSite(site.id)}
-                              className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -270,8 +302,7 @@ export const SitesSettingsModal: React.FC<SitesSettingsModalProps> = ({ isOpen, 
                         onSave={(newCategory) => {
                           addCategory({
                             name: newCategory.name,
-                            name_zh: newCategory.name_zh,
-                            color: newCategory.color
+                            name_zh: newCategory.name_zh
                           });
                           setShowAddCategory(false);
                         }}
@@ -301,7 +332,7 @@ export const SitesSettingsModal: React.FC<SitesSettingsModalProps> = ({ isOpen, 
                       <>
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
-                            <div className={`w-4 h-4 rounded-full ${category.color || 'bg-gray-500'}`}></div>
+                            <div className={`w-4 h-4 rounded-full ${getRandomCategoryColor(category.id)}`}></div>
                             <div>
                               <div className="font-medium text-text">
                                 {lang === 'zh' ? (category.name_zh || category.name) : category.name}
@@ -478,15 +509,8 @@ interface CategoryEditorProps {
 const CategoryEditor: React.FC<CategoryEditorProps> = ({ category, lang, onSave, onCancel, onDelete }) => {
   const [formData, setFormData] = useState({
     name: category?.name || '',
-    name_zh: category?.name_zh || '',
-    color: category?.color || 'bg-blue-500'
+    name_zh: category?.name_zh || ''
   });
-
-  const COLOR_OPTIONS = [
-    'bg-red-500', 'bg-pink-500', 'bg-purple-500', 'bg-indigo-500',
-    'bg-blue-500', 'bg-cyan-500', 'bg-teal-500', 'bg-green-500',
-    'bg-yellow-500', 'bg-orange-500', 'bg-gray-500', 'bg-black'
-  ];
 
   return (
     <div className="space-y-4">
@@ -510,21 +534,7 @@ const CategoryEditor: React.FC<CategoryEditorProps> = ({ category, lang, onSave,
           placeholder={lang === 'zh' ? '输入中文名' : 'Enter Chinese name'}
         />
       </div>
-      <div>
-        <label className="block text-sm font-medium text-text mb-1">{lang === 'zh' ? '颜色' : 'Color'}</label>
-        <div className="flex flex-wrap gap-2">
-          {COLOR_OPTIONS.map(color => (
-            <button
-              key={color}
-              onClick={() => setFormData({ ...formData, color })}
-              className={`w-8 h-8 rounded-full ${color} ${
-                formData.color === color ? 'ring-2 ring-offset-2 ring-primary' : ''
-              }`}
-            />
-          ))}
-        </div>
-      </div>
-      <div className="flex justify-between">
+        <div className="flex justify-between">
         <div>
           {onDelete && (
             <button
