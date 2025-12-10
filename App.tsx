@@ -350,7 +350,7 @@ export default function App() {
 
   // Run check on mount
   useEffect(() => {
-    handleCheckAll();
+    // handleCheckAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
