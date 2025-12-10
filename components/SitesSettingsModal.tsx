@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSitesManager } from './useSitesManager';
 import { SiteConfig, CategoryConfig, Language } from '../types';
-import { X, Upload, Download, Settings, Globe, Folder, Plus, Trash2, Save, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, Upload, Download, Settings, Globe, Folder, Plus, Trash2, Save, RotateCcw, ChevronDown, ChevronUp, Cloud } from 'lucide-react';
 import { TRANSLATIONS } from '../constants';
 
 interface SitesSettingsModalProps {
@@ -37,15 +37,28 @@ export const SitesSettingsModal: React.FC<SitesSettingsModalProps> = ({ isOpen, 
     deleteSite,
     resetToDefault,
     exportData,
-    importData
+    importData,
+    syncServers,
+    addSyncServer,
+    removeSyncServer,
+    createSyncLink,
+    uploadDataToServer,
+    downloadDataFromServer,
+    compareDataWithServer
   } = useSitesManager();
 
-  const [activeTab, setActiveTab] = useState<'sites' | 'categories'>('sites');
+  const [activeTab, setActiveTab] = useState<'sites' | 'categories' | 'sync'>('sites');
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [showAddSite, setShowAddSite] = useState(false);
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [editingSite, setEditingSite] = useState<string | null>(null);
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set(categories.map(cat => cat.id)));
+
+  // 同步相关状态
+  const [syncLink, setSyncLink] = useState('');
+  const [selectedServer, setSelectedServer] = useState('https://pb.190699.xyz');
+  const [syncStatus, setSyncStatus] = useState<{ type: 'success' | 'error' | 'warning' | ''; message: string }>({ type: '', message: '' });
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const t = TRANSLATIONS[lang];
 
@@ -125,6 +138,19 @@ export const SitesSettingsModal: React.FC<SitesSettingsModalProps> = ({ isOpen, 
             <div className="flex items-center gap-2">
               <Folder className="w-4 h-4" />
               {lang === 'zh' ? '分类' : 'Categories'} ({categories.length})
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('sync')}
+            className={`px-6 py-3 text-sm font-medium transition-colors ${
+              activeTab === 'sync'
+                ? 'text-primary border-b-2 border-primary bg-primary/5'
+                : 'text-muted hover:text-text'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Cloud className="w-4 h-4" />
+              {lang === 'zh' ? '同步' : 'Sync'}
             </div>
           </button>
         </div>
@@ -359,6 +385,252 @@ export const SitesSettingsModal: React.FC<SitesSettingsModalProps> = ({ isOpen, 
               </div>
 
 
+            </div>
+          )}
+
+          {/* Sync Tab */}
+          {activeTab === 'sync' && (
+            <div className="p-6 space-y-6">
+              {/* Server and Link Management */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-text">{lang === 'zh' ? '服务器和同步链接管理' : 'Server & Sync Link Management'}</h3>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-text mb-2">
+                      {lang === 'zh' ? '服务器地址' : 'Server Address'}
+                    </label>
+                    <div className="flex gap-2">
+                      <select
+                        value={selectedServer}
+                        onChange={(e) => {
+                          const newServer = e.target.value;
+                          setSelectedServer(newServer);
+
+                          // 如果当前同步链接为空或等于之前的选择，自动填入新地址
+                          if ((!syncLink.trim() || syncLink === selectedServer) && newServer && newServer !== '') {
+                            setSyncLink(newServer);
+                          }
+                        }}
+                        className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      >
+                        <option value="https://pb.190699.xyz">https://pb.190699.xyz (默认)</option>
+                        <option value="">自定义地址</option>
+                        {syncServers.map((server, index) => (
+                          <option key={index} value={server}>{server}</option>
+                        ))}
+                      </select>
+                      {selectedServer && syncServers.includes(selectedServer) && selectedServer !== 'https://pb.190699.xyz' && (
+                        <button
+                          onClick={() => {
+                            removeSyncServer(selectedServer);
+                            setSelectedServer('https://pb.190699.xyz');
+                            setSyncStatus({ type: 'success', message: lang === 'zh' ? '地址已删除' : 'Server removed' });
+                          }}
+                          className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-1"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          {lang === 'zh' ? '删除' : 'Delete'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-text mb-2">
+                      {lang === 'zh' ? '同步链接' : 'Sync Link'}
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={syncLink}
+                        onChange={(e) => setSyncLink(e.target.value)}
+                        placeholder={lang === 'zh' ? '例如: https://pb.190699.xyz/abc123:TOKEN' : 'e.g.: https://pb.190699.xyz/abc123:TOKEN'}
+                        className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      />
+                      <button
+                        onClick={() => {
+                          if (syncLink.trim()) {
+                            addSyncServer(syncLink.trim());
+                            setSyncStatus({ type: 'success', message: lang === 'zh' ? '链接已保存' : 'Link saved' });
+                          }
+                        }}
+                        className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                      >
+                        {lang === 'zh' ? '保存' : 'Save'}
+                      </button>
+                    </div>
+                    <p className="text-xs text-muted mt-1">
+                      {lang === 'zh' ? '格式: https://pb.190699.xyz/id:token 或 https://pb.190699.xyz/~id:token' : 'Format: https://pb.190699.xyz/id:token or https://pb.190699.xyz/~id:token'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sync Operations */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-text">{lang === 'zh' ? '数据同步操作' : 'Data Sync Operations'}</h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    onClick={async () => {
+                      setIsSyncing(true);
+                      setSyncStatus({ type: '', message: '' });
+                      try {
+                        const result = await createSyncLink(selectedServer);
+                        if (result.manageUrl) {
+                          setSyncLink(result.manageUrl);
+                          addSyncServer(result.manageUrl);
+                          setSyncStatus({
+                            type: 'success',
+                            message: lang === 'zh'
+                              ? `同步链接创建成功！管理链接: ${result.manageUrl}`
+                              : `Sync link created! Management URL: ${result.manageUrl}`
+                          });
+                        }
+                      } catch (error) {
+                        setSyncStatus({
+                          type: 'error',
+                          message: lang === 'zh' ? '创建失败: ' + error.message : 'Creation failed: ' + error.message
+                        });
+                      }
+                      setIsSyncing(false);
+                    }}
+                    disabled={isSyncing}
+                    className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    {isSyncing ? (lang === 'zh' ? '创建中...' : 'Creating...') : (lang === 'zh' ? '创建同步链接' : 'Create Sync Link')}
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      if (!syncLink.trim()) {
+                        setSyncStatus({
+                          type: 'warning',
+                          message: lang === 'zh' ? '请输入同步链接' : 'Please enter sync link'
+                        });
+                        return;
+                      }
+                      setIsSyncing(true);
+                      setSyncStatus({ type: '', message: '' });
+                      try {
+                        await uploadDataToServer(syncLink.trim());
+                        setSyncStatus({
+                          type: 'success',
+                          message: lang === 'zh' ? '数据上传成功' : 'Data uploaded successfully'
+                        });
+                      } catch (error) {
+                        setSyncStatus({
+                          type: 'error',
+                          message: lang === 'zh' ? '上传失败: ' + error.message : 'Upload failed: ' + error.message
+                        });
+                      }
+                      setIsSyncing(false);
+                    }}
+                    disabled={isSyncing}
+                    className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Upload className="w-4 h-4" />
+                    {isSyncing ? (lang === 'zh' ? '上传中...' : 'Uploading...') : (lang === 'zh' ? '上传数据' : 'Upload Data')}
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      if (!syncLink.trim()) {
+                        setSyncStatus({
+                          type: 'warning',
+                          message: lang === 'zh' ? '请输入同步链接' : 'Please enter sync link'
+                        });
+                        return;
+                      }
+                      setIsSyncing(true);
+                      setSyncStatus({ type: '', message: '' });
+                      try {
+                        await downloadDataFromServer(syncLink.trim());
+                        setSyncStatus({
+                          type: 'success',
+                          message: lang === 'zh' ? '数据下载成功' : 'Data downloaded successfully'
+                        });
+                      } catch (error) {
+                        setSyncStatus({
+                          type: 'error',
+                          message: lang === 'zh' ? '下载失败: ' + error.message : 'Download failed: ' + error.message
+                        });
+                      }
+                      setIsSyncing(false);
+                    }}
+                    disabled={isSyncing}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    {isSyncing ? (lang === 'zh' ? '下载中...' : 'Downloading...') : (lang === 'zh' ? '下载数据' : 'Download Data')}
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      if (!syncLink.trim()) {
+                        setSyncStatus({
+                          type: 'warning',
+                          message: lang === 'zh' ? '请输入同步链接' : 'Please enter sync link'
+                        });
+                        return;
+                      }
+                      setIsSyncing(true);
+                      setSyncStatus({ type: '', message: '' });
+                      try {
+                        const differences = await compareDataWithServer(syncLink.trim());
+                        if (differences) {
+                          const hasDifferences = differences.localOnly.length > 0 ||
+                                                differences.serverOnly.length > 0 ||
+                                                differences.modified.length > 0;
+                          if (hasDifferences) {
+                            setSyncStatus({
+                              type: 'warning',
+                              message: lang === 'zh'
+                                ? `发现差异: 本地独有${differences.localOnly.length}个, 服务器独有${differences.serverOnly.length}个, 已修改${differences.modified.length}个`
+                                : `Differences found: Local only: ${differences.localOnly.length}, Server only: ${differences.serverOnly.length}, Modified: ${differences.modified.length}`
+                            });
+                          } else {
+                            setSyncStatus({
+                              type: 'success',
+                              message: lang === 'zh' ? '数据完全一致' : 'Data is identical'
+                            });
+                          }
+                        }
+                      } catch (error) {
+                        setSyncStatus({
+                          type: 'error',
+                          message: lang === 'zh' ? '比较失败: ' + error.message : 'Comparison failed: ' + error.message
+                        });
+                      }
+                      setIsSyncing(false);
+                    }}
+                    disabled={isSyncing}
+                    className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    {isSyncing ? (lang === 'zh' ? '比较中...' : 'Comparing...') : (lang === 'zh' ? '比较数据' : 'Compare Data')}
+                  </button>
+                </div>
+              </div>
+
+              {/* Status Display */}
+              {syncStatus.message && (
+                <div className={`p-4 rounded-lg border ${
+                  syncStatus.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
+                  syncStatus.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
+                  syncStatus.type === 'warning' ? 'bg-yellow-50 border-yellow-200 text-yellow-800' :
+                  'bg-gray-50 border-gray-200 text-gray-800'
+                }`}>
+                  {syncStatus.message}
+                </div>
+              )}
+
+              {/* Data Statistics */}
+              <div className="text-sm text-muted">
+                <p>{lang === 'zh' ? `当前数据: ${sites.length} 个网站, ${categories.length} 个分类` : `Current data: ${sites.length} sites, ${categories.length} categories`}</p>
+              </div>
             </div>
           )}
         </div>
